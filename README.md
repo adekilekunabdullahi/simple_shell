@@ -1,1 +1,1 @@
-team project by joseph and abdullahi
+simple shell project in c 
