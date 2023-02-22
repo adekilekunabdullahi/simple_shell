@@ -1,1 +1,1 @@
-Designing a simple shell project.
+team project by joseph and abdullahi
