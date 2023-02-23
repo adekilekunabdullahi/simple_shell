@@ -101,3 +101,4 @@ $ ./hsh $ setenv NAME Poppy $ echo $NAME Poppy unsetenv Usage: unsetenv [VARIABL
 $ ./hsh $ setenv NAME Poppy $ unsetenv NAME $ echo $NAME
 
 $ What we learned: How a shell works and finds commands Creating, forking and working with processes Executing a program from another program Handling dynamic memory allocation in a large program Pair programming and team work Building a test suite to check our own code
+=======
