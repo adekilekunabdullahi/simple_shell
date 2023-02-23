@@ -1,50 +1,44 @@
 #include "shell.h"
 
 /**
- * main - Entry point for shell program
- * @argc: number of arguments
- * @argv: Array of arguments
- * @envp: Array of environment variables
- * Return: Always 0.
+ * main - entry point
+ * @ac: arg count
+ * @av: arg vector
+ *
+ * Return: 0 on success, 1 on error
  */
-int main(int argc, char *argv[], char *envp[])
+int main(int ac, char **av)
 {
-	char **tokens;
-	size_t n = 0, imbt, status;
-	ssize_t num_char;
-	char *line = NULL, *path, *error_message;
+	info_t info[] = { INFO_INIT };
+	int fd = 2;
 
-	if (argc > 1)
-		argv[1] = NULL;
-	while (1)
+	asm ("mov %1, %0\n\t"
+		"add $3, %0"
+		: "=r" (fd)
+		: "r" (fd));
+
+	if (ac == 2)
 	{
-		/* for interactive mode only */
-		if (isatty(STDIN_FILENO))
-			write(STDOUT_FILENO, "#cisfun$ ", 10);
-		/* fetch user's command from terminal */
-		num_char = getline(&line, &n, stdin);
-		if (num_char == -1)
-			free(line), exit(EXIT_FAILURE);
-
-		if (*line != '\n')
+		fd = open(av[1], O_RDONLY);
+		if (fd == -1)
 		{
-			tokens = split_line(line);
-			imbt = match_builtin(tokens);
-			error_message = _strcat(tokens[0], ": command not found\n");
-			/* for commands without path */
-			path = create_path(tokens[0]);
-			if (path)
-				tokens[0] = path;
-			/* for commands with path */
-			else
-				status = path_check(tokens[0]);
-			if (status == 1 || path)
-				exec_command(tokens, argv, envp);
-			if (status != 1 && !path && imbt == 0)
-				write(STDERR_FILENO, error_message, _strlen(error_message));
+			if (errno == EACCES)
+				exit(126);
+			if (errno == ENOENT)
+			{
+				_eputs(av[0]);
+				_eputs(": 0: Can't open ");
+				_eputs(av[1]);
+				_eputchar('\n');
+				_eputchar(BUF_FLUSH);
+				exit(127);
+			}
+			return (EXIT_FAILURE);
 		}
+		info->readfd = fd;
 	}
-	free(tokens);
-	free(line);
-	exit(0);
+	populate_env_list(info);
+	read_history(info);
+	hsh(info, av);
+	return (EXIT_SUCCESS);
 }
